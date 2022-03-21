@@ -49,7 +49,7 @@ new class {
 	add_sun(scene) {
 
 		let planet = new THREE.Mesh(
-			new THREE.SphereGeometry(10, 32, 32),
+			new THREE.SphereGeometry(3, 32, 32),
 			new THREE.MeshBasicMaterial({
 				map: new THREE.TextureLoader().load('./assets/img/sun.jpg')
 			})
@@ -63,8 +63,8 @@ new class {
 
 		sun.update = (time) => {
 			planet.rotation.y += 0.0003
-			sun.position.x = Math.cos(time) * 100
-			sun.position.z = Math.sin(time) * 100
+			sun.position.x = Math.cos(time / 10) * 100
+			sun.position.z = Math.sin(time / 10) * 100
 		}
 
 
