@@ -59,7 +59,6 @@ new class {
 
 		sun.add(planet)
 
-		//sun.add(new THREE.HemisphereLight(0xffffff, 0x000000))
 		sun.add(new THREE.PointLight(0xffffff, 1, 2000))
 
 		sun.update = (time) => {
@@ -79,12 +78,11 @@ new class {
 			new THREE.SphereGeometry(5, 32, 32),
 			new THREE.MeshLambertMaterial({
 				map: new THREE.TextureLoader().load('./assets/img/earth.jpg'),
-				//normalMap: new THREE.TextureLoader().load('./assets/img/normal.jpg'),
 			})
 		);
 		let earth = new THREE.Object3D
 		earth.add(planet)
-
+		planet.rotation.z = 0.235
 		earth.update = (time) => {
 			planet.rotation.y -= 0.01
 		}
@@ -97,7 +95,6 @@ new class {
 			new THREE.SphereGeometry(1, 32, 32),
 			new THREE.MeshLambertMaterial({
 				map: new THREE.TextureLoader().load('./assets/img/moon.jpg'),
-				//normalMap: new THREE.TextureLoader().load('./assets/img/normal.jpg'),
 			})
 		);
 		let moon = new THREE.Object3D
@@ -133,8 +130,8 @@ new class {
 		this.scene = new THREE.Scene()
 		this.camera.lookAt(this.scene.position)
 
-		//this.ambientLight = new THREE.AmbientLight(0xffffff, 0.001);
-		//this.scene.add(this.ambientLight);
+
+		//this.scene.add(new THREE.AmbientLight(0xffffff, 1));
 
 		this.renderer = new THREE.WebGLRenderer({ antialias: true })
 		this.renderer.setSize(window.innerWidth, window.innerHeight)
