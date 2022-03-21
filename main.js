@@ -49,7 +49,7 @@ new class {
 	add_sun(scene) {
 
 		let planet = new THREE.Mesh(
-			new THREE.SphereGeometry(20, 32, 32),
+			new THREE.SphereGeometry(10, 32, 32),
 			new THREE.MeshBasicMaterial({
 				map: new THREE.TextureLoader().load('./assets/img/sun.jpg')
 			})
@@ -63,8 +63,8 @@ new class {
 
 		sun.update = (time) => {
 			planet.rotation.y += 0.0003
-			sun.position.x = Math.cos(time) * 200
-			sun.position.z = Math.sin(time) * 200
+			sun.position.x = Math.cos(time) * 100
+			sun.position.z = Math.sin(time) * 100
 		}
 
 
@@ -75,7 +75,7 @@ new class {
 
 	add_earth(scene) {
 		let planet = new THREE.Mesh(
-			new THREE.SphereGeometry(5, 32, 32),
+			new THREE.SphereGeometry(0.5, 32, 32),
 			new THREE.MeshLambertMaterial({
 				map: new THREE.TextureLoader().load('./assets/img/earth.jpg'),
 			})
@@ -92,7 +92,7 @@ new class {
 	}
 	add_moon(scene) {
 		let real_moon = new THREE.Mesh(
-			new THREE.SphereGeometry(1, 32, 32),
+			new THREE.SphereGeometry(0.1, 32, 32),
 			new THREE.MeshLambertMaterial({
 				map: new THREE.TextureLoader().load('./assets/img/moon.jpg'),
 			})
@@ -101,8 +101,8 @@ new class {
 		moon.add(real_moon)
 
 		moon.update = (time) => {
-			moon.position.x = Math.cos(time) * 17
-			moon.position.z = Math.sin(time) * 17
+			moon.position.x = Math.cos(time)
+			moon.position.z = Math.sin(time)
 			real_moon.rotation.y -= 0.001
 		}
 		if (scene) scene.add(moon)
@@ -124,14 +124,14 @@ new class {
 
 	//init
 	init_three() {
-		this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000)
+		this.camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 1, 3000)
 		this.camera.position.set(0, 20, -20)
 
 		this.scene = new THREE.Scene()
 		this.camera.lookAt(this.scene.position)
 
 
-		//this.scene.add(new THREE.AmbientLight(0xffffff, 1));
+		this.scene.add(new THREE.AmbientLight(0xffffff, 0.01));
 
 		this.renderer = new THREE.WebGLRenderer({ antialias: true })
 		this.renderer.setSize(window.innerWidth, window.innerHeight)
