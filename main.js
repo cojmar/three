@@ -4,7 +4,7 @@ import { OrbitControls } from './assets/js/OrbitControls.js'
 new class {
 	constructor() {
 		this.init_three()
-			.init_helpers()
+			//.init_helpers()
 			.init_controls()
 			.main()
 		this.render().update()
@@ -19,17 +19,65 @@ new class {
 	main() {
 		this.add_starts()
 		this.objects = {
-			'moon': this.add_moon(this.scene)
+			'moon': this.add_moon(this.scene),
+			'earth': this.add_earth(this.scene),
+			'sun': this.add_sun(this.scene)
+
 		}
 		this.camera_follow(this.objects.moon)
 	}
 	camera_follow(obj) {
 		obj.add(this.camera)
 	}
+
+	add_sun(scene) {
+
+		let planet = new THREE.Mesh(
+			new THREE.SphereGeometry(20, 32, 32),
+			new THREE.MeshBasicMaterial({
+				map: new THREE.TextureLoader().load('./assets/img/sun.jpg'),
+				normalMap: new THREE.TextureLoader().load('./assets/img/normal.jpg'),
+			})
+		);
+		let sun = new THREE.Object3D
+		sun.position.x -= 100
+
+		sun.add(planet)
+		sun.add(new THREE.HemisphereLight(0xffffff, 0x000000))
+		sun.add(new THREE.PointLight(0xffffff, 1, 2000))
+
+		sun.update = (time) => {
+			planet.rotation.y += 0.0003
+		}
+
+
+		if (scene) scene.add(sun)
+		return sun
+
+	}
+
+	add_earth(scene) {
+		let planet = new THREE.Mesh(
+			new THREE.SphereGeometry(5, 32, 32),
+			new THREE.MeshLambertMaterial({
+				map: new THREE.TextureLoader().load('./assets/img/earth.jpg'),
+				normalMap: new THREE.TextureLoader().load('./assets/img/normal.jpg'),
+			})
+		);
+		let earth = new THREE.Object3D
+		earth.add(planet)
+
+		earth.update = (time) => {
+			planet.rotation.y -= 0.01
+		}
+
+		if (scene) scene.add(earth)
+		return earth
+	}
 	add_moon(scene) {
 		let real_moon = new THREE.Mesh(
-			new THREE.SphereGeometry(3, 32, 32),
-			new THREE.MeshStandardMaterial({
+			new THREE.SphereGeometry(1, 32, 32),
+			new THREE.MeshLambertMaterial({
 				map: new THREE.TextureLoader().load('./assets/img/moon.jpg'),
 				normalMap: new THREE.TextureLoader().load('./assets/img/normal.jpg'),
 			})
@@ -38,9 +86,9 @@ new class {
 		moon.add(real_moon)
 
 		moon.update = (time) => {
-			moon.position.x = Math.cos(time) * 15
-			moon.position.z = Math.sin(time) * 15
-			real_moon.rotation.y += 0.01
+			moon.position.x = Math.cos(time) * 17
+			moon.position.z = Math.sin(time) * 17
+			real_moon.rotation.y -= 0.001
 		}
 
 		if (scene) scene.add(moon)
@@ -49,7 +97,7 @@ new class {
 
 	add_starts() {
 		let addStar = () => {
-			const geometry = new THREE.SphereGeometry(0.25, 24, 24)
+			const geometry = new THREE.SphereGeometry(0.15, 24, 24)
 			const material = new THREE.MeshStandardMaterial({ color: 0xffffff })
 			const star = new THREE.Mesh(geometry, material)
 			const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(600))
@@ -68,8 +116,8 @@ new class {
 		this.scene = new THREE.Scene()
 		this.camera.lookAt(this.scene.position)
 
-		this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
-		this.scene.add(this.ambientLight);
+		this.ambientLight = new THREE.AmbientLight(0xffffff, 0.001);
+		//this.scene.add(this.ambientLight);
 
 		this.renderer = new THREE.WebGLRenderer({ antialias: true })
 		this.renderer.setSize(window.innerWidth, window.innerHeight)
