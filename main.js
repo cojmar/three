@@ -42,7 +42,7 @@ new class {
 
 		}
 		if (scene) scene.add(g)
-		this.camera_follow(moon)
+			//this.camera_follow(moon)
 		return g
 	}
 
