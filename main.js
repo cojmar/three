@@ -19,15 +19,31 @@ new class {
 	main() {
 		this.add_starts()
 		this.objects = {
-			'moon': this.add_moon(this.scene),
-			'earth': this.add_earth(this.scene),
-			'sun': this.add_sun(this.scene)
-
+			//'moon': this.add_moon(this.scene),
+			//'earth': this.add_earth(this.scene),
+			'sun': this.add_sun(this.scene),
+			'earth_group': this.add_earth_group(this.scene),
 		}
-		this.camera_follow(this.objects.moon)
+
+		//this.camera_follow(this.objects.sun)
 	}
 	camera_follow(obj) {
 		obj.add(this.camera)
+	}
+
+	add_earth_group(scene) {
+		let g = new THREE.Object3D
+		let earth = this.add_earth(g)
+		let moon = this.add_moon(g)
+
+		g.update = (time) => {
+			moon.update(time)
+			earth.update(time)
+
+		}
+		if (scene) scene.add(g)
+		this.camera_follow(moon)
+		return g
 	}
 
 	add_sun(scene) {
@@ -35,8 +51,7 @@ new class {
 		let planet = new THREE.Mesh(
 			new THREE.SphereGeometry(20, 32, 32),
 			new THREE.MeshBasicMaterial({
-				map: new THREE.TextureLoader().load('./assets/img/sun.jpg'),
-				normalMap: new THREE.TextureLoader().load('./assets/img/normal.jpg'),
+				map: new THREE.TextureLoader().load('./assets/img/sun.jpg')
 			})
 		);
 		let sun = new THREE.Object3D
@@ -49,6 +64,8 @@ new class {
 
 		sun.update = (time) => {
 			planet.rotation.y += 0.0003
+			sun.position.x = Math.cos(time) * 200
+			sun.position.z = Math.sin(time) * 200
 		}
 
 
@@ -62,7 +79,7 @@ new class {
 			new THREE.SphereGeometry(5, 32, 32),
 			new THREE.MeshLambertMaterial({
 				map: new THREE.TextureLoader().load('./assets/img/earth.jpg'),
-				normalMap: new THREE.TextureLoader().load('./assets/img/normal.jpg'),
+				//normalMap: new THREE.TextureLoader().load('./assets/img/normal.jpg'),
 			})
 		);
 		let earth = new THREE.Object3D
@@ -80,7 +97,7 @@ new class {
 			new THREE.SphereGeometry(1, 32, 32),
 			new THREE.MeshLambertMaterial({
 				map: new THREE.TextureLoader().load('./assets/img/moon.jpg'),
-				normalMap: new THREE.TextureLoader().load('./assets/img/normal.jpg'),
+				//normalMap: new THREE.TextureLoader().load('./assets/img/normal.jpg'),
 			})
 		);
 		let moon = new THREE.Object3D
@@ -91,7 +108,6 @@ new class {
 			moon.position.z = Math.sin(time) * 17
 			real_moon.rotation.y -= 0.001
 		}
-
 		if (scene) scene.add(moon)
 		return moon
 	}
