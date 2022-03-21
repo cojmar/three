@@ -43,7 +43,8 @@ new class {
 		sun.position.x -= 100
 
 		sun.add(planet)
-		sun.add(new THREE.HemisphereLight(0xffffff, 0x000000))
+
+		//sun.add(new THREE.HemisphereLight(0xffffff, 0x000000))
 		sun.add(new THREE.PointLight(0xffffff, 1, 2000))
 
 		sun.update = (time) => {
@@ -116,7 +117,7 @@ new class {
 		this.scene = new THREE.Scene()
 		this.camera.lookAt(this.scene.position)
 
-		this.ambientLight = new THREE.AmbientLight(0xffffff, 0.001);
+		//this.ambientLight = new THREE.AmbientLight(0xffffff, 0.001);
 		//this.scene.add(this.ambientLight);
 
 		this.renderer = new THREE.WebGLRenderer({ antialias: true })
