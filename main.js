@@ -37,8 +37,6 @@ new class {
 	}
 	camera_follow(obj) {
 		this.camera_obj = obj
-		this.camera.lookAt(...Object.values(this.camera_obj.position))
-
 	}
 
 	add_earth_group(scene) {
