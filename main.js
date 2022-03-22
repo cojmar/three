@@ -4,7 +4,7 @@ import { OrbitControls } from './assets/js/OrbitControls.js'
 new class {
 	constructor() {
 		this.init_three()
-			//.init_helpers()			
+			.init_helpers()
 			.init_controls()
 			.main()
 		this.render().update()
@@ -128,7 +128,24 @@ new class {
 	init_dom() {
 		setTimeout(() => {
 			//init menu
-			document.querySelector('#menu').innerHTML = Object.keys(this.objects).map(key => `<a href="#${key}"><button>${key}</button></a>`).join('&nbsp;&nbsp;')
+			document.querySelector('#menu').innerHTML = [
+				Object.keys(this.objects).map(key => `<a href="#${key}"><button>${key}</button></a>`).join('&nbsp;&nbsp;'),
+				`<button id="grid" id="grid">show grid</button>`
+
+
+			].join('<br>')
+
+			document.querySelector('#grid').onclick = () => {
+				if (this.helpers_on) {
+					this.helpers.map(helper => this.scene.remove(helper))
+					this.helpers_on = false
+					document.querySelector('#grid').innerHTML = 'show grid'
+				} else {
+					this.helpers.map(helper => this.scene.add(helper))
+					this.helpers_on = true
+					document.querySelector('#grid').innerHTML = 'hide grid'
+				}
+			}
 
 			window.addEventListener("hashchange", () => {
 				this.camera_follow(location.hash.replace('#', ''))
@@ -161,8 +178,10 @@ new class {
 		return this.render()
 	}
 	init_helpers() {
-		this.scene.add(new THREE.GridHelper(200, 50))
-		this.scene.add(new THREE.AxesHelper(200, 50))
+		this.helpers = [
+			new THREE.GridHelper(200, 50),
+			new THREE.AxesHelper(200, 50)
+		]
 		return this
 	}
 	init_controls() {

@@ -12,3 +12,6 @@ canvas{
     padding: 10px;
     z-index: 1;     
 }
+button{
+    margin:2px;
+}
