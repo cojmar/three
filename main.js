@@ -13,6 +13,14 @@ new class {
 		requestAnimationFrame((time) => this.update(time))
 		Object.values(this.objects).map(obj => { if (obj.update) obj.update(time / 10000) })
 
+		if (this.camera_obj) {
+			if (this.controls) {
+				this.controls.target = this.camera_obj.position
+				this.controls.update()
+			} else
+				this.camera.lookAt(...Object.values(this.camera_obj.position))
+		}
+
 		this.render()
 		return this
 	}
@@ -28,7 +36,9 @@ new class {
 		//this.camera_follow(this.objects.sun)
 	}
 	camera_follow(obj) {
-		obj.add(this.camera)
+		this.camera_obj = obj
+		this.camera.lookAt(...Object.values(this.camera_obj.position))
+
 	}
 
 	add_earth_group(scene) {
@@ -42,7 +52,7 @@ new class {
 
 		}
 		if (scene) scene.add(g)
-			//this.camera_follow(moon)
+		this.camera_follow(moon)
 		return g
 	}
 
