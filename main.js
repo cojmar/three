@@ -4,7 +4,7 @@ import { OrbitControls } from './assets/js/OrbitControls.js'
 new class {
 	constructor() {
 		this.init_three()
-			//.init_helpers()
+			//.init_helpers()			
 			.init_controls()
 			.main()
 		this.render().update()
@@ -26,37 +26,31 @@ new class {
 	}
 	main() {
 		this.add_starts()
+
+		let e_m = new THREE.Object3D // Earth moon group
+		this.scene.add(e_m)
+
 		this.objects = {
-			//'moon': this.add_moon(this.scene),
-			//'earth': this.add_earth(this.scene),
+			'moon': this.add_moon(e_m),
+			'earth': this.add_earth(e_m),
 			'sun': this.add_sun(this.scene),
-			'earth_group': this.add_earth_group(this.scene),
 		}
 
-		//this.camera_follow(this.objects.sun)
+		this.init_dom()
+
+		this.camera_follow(this.objects.earth)
 	}
 	camera_follow(obj) {
-		this.camera_obj = obj
-	}
-
-	add_earth_group(scene) {
-		let g = new THREE.Object3D
-		let earth = this.add_earth(g)
-		let moon = this.add_moon(g)
-
-		g.update = (time) => {
-			moon.update(time)
-			earth.update(time)
-
+		if (typeof obj !== 'object') {
+			obj = this.objects[obj] || false
+			if (!obj) return obj
 		}
-		if (scene) scene.add(g)
-		this.camera_follow(moon)
-		return g
+		this.camera_obj = obj
 	}
 
 	add_sun(scene) {
 
-		let planet = new THREE.Mesh(
+		let star = new THREE.Mesh(
 			new THREE.SphereGeometry(3, 32, 32),
 			new THREE.MeshBasicMaterial({
 				map: new THREE.TextureLoader().load('./assets/img/sun.jpg')
@@ -65,12 +59,12 @@ new class {
 		let sun = new THREE.Object3D
 		sun.position.x -= 100
 
-		sun.add(planet)
+		sun.add(star)
 
 		sun.add(new THREE.PointLight(0xffffff, 1, 2000))
 
 		sun.update = (time) => {
-			planet.rotation.y += 0.0003
+			star.rotation.y += 0.0003
 			sun.position.x = Math.cos(time / 10) * 100
 			sun.position.z = Math.sin(time / 10) * 100
 		}
@@ -131,6 +125,19 @@ new class {
 	}
 
 	//init
+	init_dom() {
+		setTimeout(() => {
+			//init menu
+			document.querySelector('#menu').innerHTML = Object.keys(this.objects).map(key => `<a href="#${key}"><button>${key}</button></a>`).join('&nbsp;&nbsp;')
+
+			window.addEventListener("hashchange", () => {
+				this.camera_follow(location.hash.replace('#', ''))
+			})
+
+			this.camera_follow(location.hash.replace('#', ''))
+		})
+	}
+
 	init_three() {
 		this.camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 1, 3000)
 		this.camera.position.set(0, 20, -20)

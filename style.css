@@ -2,5 +2,13 @@ canvas{
     position: fixed;
     top:0;
     left:0;
-background-color: #e0d679;    
+}
+#menu{
+    position: fixed;
+    width: 400px;
+    height: 10px;
+    left: 0;
+    top: 0;
+    padding: 10px;
+    z-index: 1;     
 }
