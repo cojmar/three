@@ -60,14 +60,14 @@ new class {
 			texture: 'venus',
 			orbit: [108.200 / 8, 0.4],
 			spin: 1.3,
-			fov: 2.7
+			fov: 2.5
 		})
 
 		//earth
 		this.objects.earth = this.make_planet(this.scene, {
 			texture: 'earth',
 			orbit: [149.600 / 8, 0.2],
-			spin: 3,
+			spin: 2.8,
 			fov: 2.6
 		})
 
@@ -86,12 +86,15 @@ new class {
 			position: new THREE.Vector3(0, 0, -40),
 			texture: 'mars',
 			orbit: [227.940 / 8, 0.1],
-			spin: 2.2,
+			spin: 2.6,
 			fov: 1.35
 		})
 
+		//inner asteroid belt
+		this.make_asteroids(this.scene, 350 / 8, 10)
+
 		//stars
-		this.make_starts(this.objects.sun)
+		this.make_starts(this.scene)
 
 		this.camera_follow(this.objects.earth)
 		this.init_dom()
@@ -109,7 +112,37 @@ new class {
 		}
 	}
 
+	make_asteroids(scene, radius, width) {
+		let obj = new THREE.Object3D
+		obj.update = (f) => {
+			if (!obj.update_list) obj.update_list = []
+			if (typeof f === 'function') obj.update_list.push(f)
+			else obj.update_list.map(f2 => f2(f))
+		}
 
+
+		let addAsteroid = () => {
+			let material = new THREE.MeshLambertMaterial({ color: 0x747171 })
+				//material = new THREE.MeshLambertMaterial({ map: new THREE.TextureLoader().load(`./assets/img/asteroid.jpg`) })
+
+
+			const asteroid = new THREE.Mesh(new THREE.OctahedronGeometry(Math.random() / 10, Math.floor(Math.random() * 2)), material)
+			const [x, y, z] = [
+				THREE.MathUtils.randFloatSpread(2 * radius + width),
+				Math.random(),
+				THREE.MathUtils.randFloatSpread(2 * radius + width)
+			]
+			asteroid.position.set(x, y, z)
+			let distance = Math.sqrt(x * x + z * z)
+			let ok = (distance > (radius - width) && distance < radius)
+			if (ok) obj.add(asteroid)
+		}
+
+
+		Array(10000).fill().map(addAsteroid)
+		if (scene) scene.add(obj)
+		return obj
+	}
 
 	make_starts(scene) {
 		let addStar = () => {
@@ -134,6 +167,9 @@ new class {
 
 	make_planet(scene, options) {
 		let obj = new THREE.Object3D
+		if (!options) options = {}
+		options.clickable = true
+
 		obj.options = options
 		let material = options.material || THREE.MeshLambertMaterial
 		let planet = new THREE.Mesh(
@@ -181,8 +217,9 @@ new class {
 			Object.keys(this.objects).map(key => `<a href="#${key}"><button>${key}</button></a>`).join('&nbsp;&nbsp;'),
 			`
 				Speed <input type="number" id="speed" value="1" style="width:50px" step=10>
-				<button id="grid" id="grid">grid (off)</button>
-				<button id="light" id="light">light (off)</button>
+				<button id="grid">grid (off)</button>
+				<button id="light">light (off)</button>
+				<button id="fog">tint (off)</button>
 				`
 		].join('<br>')
 
@@ -200,8 +237,23 @@ new class {
 				this.helpers.map(helper => this.scene.add(helper))
 				this.grid_on = true
 				e.target.innerHTML = e.target.innerHTML.replace("(off)", "(on)")
+
 			}
 		}
+		document.querySelector('#fog').onclick = (e) => {
+			if (this.fog_on) {
+				this.scene.fog = false
+				this.fog_on = false
+				e.target.innerHTML = e.target.innerHTML.replace("(on)", "(off)")
+			} else {
+				this.scene.fog = new THREE.FogExp2(0xdf0000, 0.005)
+				this.fog_on = true
+				e.target.innerHTML = e.target.innerHTML.replace("(off)", "(on)")
+
+			}
+		}
+
+
 
 		document.querySelector('#light').onclick = (e) => {
 			if (this.light_on) {
@@ -220,7 +272,12 @@ new class {
 			this.mouseVector.y = 1 - 2 * (e.clientY / window.innerHeight)
 			this.raycaster.setFromCamera(this.mouseVector, this.camera)
 			const intersects = this.raycaster.intersectObjects(this.scene.children, true)
-			this.renderer.domElement.style.cursor = intersects.length ? 'pointer' : 'default'
+			let cursor = 'default'
+			if (intersects.length) {
+				let obj = intersects[0].object.parent
+				if (obj.options.clickable) cursor = 'pointer'
+			}
+			this.renderer.domElement.style.cursor = cursor
 		})
 
 		window.addEventListener('click', (e) => {
@@ -228,7 +285,10 @@ new class {
 			this.mouseVector.y = 1 - 2 * (e.clientY / window.innerHeight)
 			this.raycaster.setFromCamera(this.mouseVector, this.camera)
 			const intersects = this.raycaster.intersectObjects(this.scene.children, true)
-			if (intersects.length) this.camera_follow(intersects[0].object.parent)
+			if (intersects.length) {
+				let obj = intersects[0].object.parent
+				if (obj.options.clickable) this.camera_follow(obj)
+			}
 		})
 
 		window.addEventListener("hashchange", () => {
@@ -244,6 +304,7 @@ new class {
 		this.camera.position.set(0, 20, -40)
 
 		this.scene = new THREE.Scene()
+
 		this.camera.lookAt(200, 0, 0)
 
 		this.scene.add(new THREE.AmbientLight(0xffffff, 0.03))
@@ -268,7 +329,8 @@ new class {
 	init_helpers() {
 		this.helpers = [
 			new THREE.GridHelper(2000, 500),
-			new THREE.AxesHelper(200, 50)
+			new THREE.AxesHelper(200, 50),
+			new THREE.FogExp2(0xdf0000, 0.0007)
 		]
 		return this
 	}
