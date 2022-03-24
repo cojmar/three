@@ -158,68 +158,67 @@ new class {
 
 	//init
 	init_dom() {
-		setTimeout(() => {
-			//init menu
-			document.querySelector('#menu').innerHTML = [
-				Object.keys(this.objects).map(key => `<a href="#${key}"><button>${key}</button></a>`).join('&nbsp;&nbsp;'),
-				`
+		//init menu
+		document.querySelector('#menu').innerHTML = [
+			Object.keys(this.objects).map(key => `<a href="#${key}"><button>${key}</button></a>`).join('&nbsp;&nbsp;'),
+			`
 				Speed <input type="number" id="speed" value="1" style="width:50px" step=10>
 				<button id="grid" id="grid">grid (off)</button>
 				<button id="light" id="light">light (off)</button>
 				`
-			].join('<br>')
+		].join('<br>')
 
-			let sp_but = document.querySelector('#speed')
-			sp_but.onchange = sp_but.onkeyup = () => {
-				this.time_speed = sp_but.value
+		let sp_but = document.querySelector('#speed')
+		sp_but.onchange = sp_but.onkeyup = () => {
+			this.time_speed = sp_but.value
+		}
+
+		document.querySelector('#grid').onclick = (e) => {
+			if (this.grid_on) {
+				this.helpers.map(helper => this.scene.remove(helper))
+				this.grid_on = false
+				e.target.innerHTML = e.target.innerHTML.replace("(on)", "(off)")
+			} else {
+				this.helpers.map(helper => this.scene.add(helper))
+				this.grid_on = true
+				e.target.innerHTML = e.target.innerHTML.replace("(off)", "(on)")
 			}
+		}
 
-			document.querySelector('#grid').onclick = (e) => {
-				if (this.grid_on) {
-					this.helpers.map(helper => this.scene.remove(helper))
-					this.grid_on = false
-					e.target.innerHTML = e.target.innerHTML.replace("(on)", "(off)")
-				} else {
-					this.helpers.map(helper => this.scene.add(helper))
-					this.grid_on = true
-					e.target.innerHTML = e.target.innerHTML.replace("(off)", "(on)")
-				}
+		document.querySelector('#light').onclick = (e) => {
+			if (this.light_on) {
+				this.scene.remove(this.light)
+				this.light_on = false
+				e.target.innerHTML = e.target.innerHTML.replace("(on)", "(off)")
+			} else {
+				this.scene.add(this.light)
+				this.light_on = true
+				e.target.innerHTML = e.target.innerHTML.replace("(off)", "(on)")
 			}
+		}
+		this.mouseVector = new THREE.Vector3()
+		window.addEventListener('mousemove', (e) => {
+			this.mouseVector.x = 2 * (e.clientX / window.innerWidth) - 1
+			this.mouseVector.y = 1 - 2 * (e.clientY / window.innerHeight)
+			this.raycaster.setFromCamera(this.mouseVector, this.camera)
+			const intersects = this.raycaster.intersectObjects(this.scene.children, true)
+			this.renderer.domElement.style.cursor = intersects.length ? 'pointer' : 'default'
+		})
 
-			document.querySelector('#light').onclick = (e) => {
-				if (this.light_on) {
-					this.scene.remove(this.light)
-					this.light_on = false
-					e.target.innerHTML = e.target.innerHTML.replace("(on)", "(off)")
-				} else {
-					this.scene.add(this.light)
-					this.light_on = true
-					e.target.innerHTML = e.target.innerHTML.replace("(off)", "(on)")
-				}
-			}
-			this.mouseVector = new THREE.Vector3()
-			window.addEventListener('mousemove', (e) => {
-				this.mouseVector.x = 2 * (e.clientX / window.innerWidth) - 1
-				this.mouseVector.y = 1 - 2 * (e.clientY / window.innerHeight)
-				this.raycaster.setFromCamera(this.mouseVector, this.camera)
-				const intersects = this.raycaster.intersectObjects(this.scene.children, true)
-				this.renderer.domElement.style.cursor = intersects.length ? 'pointer' : 'default'
-			})
+		window.addEventListener('click', (e) => {
+			this.mouseVector.x = 2 * (e.clientX / window.innerWidth) - 1
+			this.mouseVector.y = 1 - 2 * (e.clientY / window.innerHeight)
+			this.raycaster.setFromCamera(this.mouseVector, this.camera)
+			const intersects = this.raycaster.intersectObjects(this.scene.children, true)
+			if (intersects.length) this.camera_follow(intersects[0].object.parent)
+		})
 
-			window.addEventListener('click', (e) => {
-				this.mouseVector.x = 2 * (e.clientX / window.innerWidth) - 1
-				this.mouseVector.y = 1 - 2 * (e.clientY / window.innerHeight)
-				this.raycaster.setFromCamera(this.mouseVector, this.camera)
-				const intersects = this.raycaster.intersectObjects(this.scene.children, true)
-				if (intersects.length) this.camera_follow(intersects[0].object.parent)
-			})
-
-			window.addEventListener("hashchange", () => {
-				this.camera_follow(location.hash.replace('#', ''))
-			})
-
+		window.addEventListener("hashchange", () => {
 			this.camera_follow(location.hash.replace('#', ''))
 		})
+
+		this.camera_follow(location.hash.replace('#', ''))
+
 	}
 
 	init_three() {
