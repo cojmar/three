@@ -70,6 +70,7 @@ new class {
 			spin: 2.8,
 			fov: 2.6
 		})
+		this.camera_follow(this.objects.earth)
 
 		//moon
 		this.objects.moon = this.make_planet(this.objects.earth, {
@@ -90,14 +91,25 @@ new class {
 			fov: 1.35
 		})
 
+		//Gen menu with planets
+		this.init_dom()
+
 		//inner asteroid belt
-		this.make_asteroids(this.scene, 350 / 8, 10)
+		this.objects.asteroids = this.make_asteroids(this.scene, 350 / 8, 10).update(() => {
+			let time = this.time()
+			time /= (Math.pow(10, 6))
+			this.objects.asteroids.rotation.y += time / 1000
+		})
+
 
 		//stars
-		this.make_starts(this.scene)
+		this.objects.stars = this.make_starts(this.scene).update(() => {
+			let time = this.time()
+			time /= (Math.pow(10, 6))
+			this.objects.stars.rotation.y += time / 1000
+		})
 
-		this.camera_follow(this.objects.earth)
-		this.init_dom()
+
 	}
 	camera_follow(obj) {
 		obj = (typeof obj !== 'object') ? this.objects[obj] || false : obj
@@ -116,8 +128,10 @@ new class {
 		let obj = new THREE.Object3D
 		obj.update = (f) => {
 			if (!obj.update_list) obj.update_list = []
-			if (typeof f === 'function') obj.update_list.push(f)
-			else obj.update_list.map(f2 => f2(f))
+			if (typeof f === 'function') {
+				obj.update_list.push(f)
+				return obj
+			} else obj.update_list.map(f2 => f2(f))
 		}
 
 
@@ -145,6 +159,15 @@ new class {
 	}
 
 	make_starts(scene) {
+		let obj = new THREE.Object3D
+		obj.update = (f) => {
+			if (!obj.update_list) obj.update_list = []
+			if (typeof f === 'function') {
+				obj.update_list.push(f)
+				return obj
+			} else obj.update_list.map(f2 => f2(f))
+		}
+
 		let addStar = () => {
 
 			const star = new THREE.Mesh(new THREE.SphereGeometry(0.05, 24, 24), new THREE.MeshBasicMaterial({ color: 0x747171 }))
@@ -159,14 +182,23 @@ new class {
 			if ((x > -1 * limit && x < limit) && (y > -1 * limit && y < limit) && (z > -1 * limit && z < limit)) ok = false
 
 
-			if (ok) scene.add(star)
+			if (ok) obj.add(star)
 		}
 
 		Array(1500).fill().map(addStar)
+		if (scene) scene.add(obj)
+		return obj
 	}
 
 	make_planet(scene, options) {
 		let obj = new THREE.Object3D
+		obj.update = (f) => {
+			if (!obj.update_list) obj.update_list = []
+			if (typeof f === 'function') {
+				obj.update_list.push(f)
+				return obj
+			} else obj.update_list.map(f2 => f2(f))
+		}
 		if (!options) options = {}
 		options.clickable = true
 
@@ -180,13 +212,6 @@ new class {
 		if (options.position) obj.position.copy(options.position)
 
 		obj.add(planet)
-
-
-		obj.update = (f) => {
-			if (!obj.update_list) obj.update_list = []
-			if (typeof f === 'function') obj.update_list.push(f)
-			else obj.update_list.map(f2 => f2(f))
-		}
 
 		if (options.orbit) obj.update(() => {
 			let time = this.time()
