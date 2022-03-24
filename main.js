@@ -91,6 +91,11 @@ new class {
 			fov: 1.35
 		})
 
+
+		//borg
+		this.objects.borg = this.make_borg(this.objects.moon, new THREE.Vector3(0.3, 0, 0))
+
+
 		//Gen menu with planets
 		this.init_dom()
 
@@ -123,8 +128,7 @@ new class {
 
 		}
 	}
-
-	make_asteroids(scene, radius, width) {
+	make_obj(scene) {
 		let obj = new THREE.Object3D
 		obj.update = (f) => {
 			if (!obj.update_list) obj.update_list = []
@@ -133,8 +137,32 @@ new class {
 				return obj
 			} else obj.update_list.map(f2 => f2(f))
 		}
+		if (scene) scene.add(obj)
+		return obj
+	}
+	make_borg(scene, position) {
+		let obj = this.make_obj(scene)
+		let borg = new THREE.Mesh(
+			new THREE.BoxGeometry(0.05, 0.05, 0.05),
+			new THREE.MeshLambertMaterial({ map: new THREE.TextureLoader().load('./assets/img/borg.jpg') })
+		)
+		obj.add(borg)
+		obj.options = {
+			clickable: true,
+			fov: 1
+		}
+		if (position) obj.position.copy(position)
 
+		obj.update(() => {
 
+			borg.rotation.y -= 0.01
+		})
+
+		return obj
+	}
+
+	make_asteroids(scene, radius, width) {
+		let obj = this.make_obj(scene)
 		let addAsteroid = () => {
 			let material = new THREE.MeshLambertMaterial({ color: 0x747171 })
 				//material = new THREE.MeshLambertMaterial({ map: new THREE.TextureLoader().load(`./assets/img/asteroid.jpg`) })
@@ -151,23 +179,12 @@ new class {
 			let ok = (distance > (radius - width) && distance < radius)
 			if (ok) obj.add(asteroid)
 		}
-
-
 		Array(10000).fill().map(addAsteroid)
-		if (scene) scene.add(obj)
 		return obj
 	}
 
 	make_starts(scene) {
-		let obj = new THREE.Object3D
-		obj.update = (f) => {
-			if (!obj.update_list) obj.update_list = []
-			if (typeof f === 'function') {
-				obj.update_list.push(f)
-				return obj
-			} else obj.update_list.map(f2 => f2(f))
-		}
-
+		let obj = this.make_obj(scene)
 		let addStar = () => {
 
 			const star = new THREE.Mesh(new THREE.SphereGeometry(0.05, 24, 24), new THREE.MeshBasicMaterial({ color: 0x747171 }))
@@ -186,19 +203,11 @@ new class {
 		}
 
 		Array(1500).fill().map(addStar)
-		if (scene) scene.add(obj)
 		return obj
 	}
 
 	make_planet(scene, options) {
-		let obj = new THREE.Object3D
-		obj.update = (f) => {
-			if (!obj.update_list) obj.update_list = []
-			if (typeof f === 'function') {
-				obj.update_list.push(f)
-				return obj
-			} else obj.update_list.map(f2 => f2(f))
-		}
+		let obj = this.make_obj(scene)
 		if (!options) options = {}
 		options.clickable = true
 
@@ -229,9 +238,6 @@ new class {
 			if (options.spin < 0) time *= -1
 			planet.rotation.y += time / 1000
 		})
-
-		if (scene) scene.add(obj)
-
 		return obj
 	}
 
@@ -300,7 +306,7 @@ new class {
 			let cursor = 'default'
 			if (intersects.length) {
 				let obj = intersects[0].object.parent
-				if (obj.options.clickable) cursor = 'pointer'
+				if (obj.options && obj.options.clickable) cursor = 'pointer'
 			}
 			this.renderer.domElement.style.cursor = cursor
 		})
@@ -312,7 +318,7 @@ new class {
 			const intersects = this.raycaster.intersectObjects(this.scene.children, true)
 			if (intersects.length) {
 				let obj = intersects[0].object.parent
-				if (obj.options.clickable) this.camera_follow(obj)
+				if (obj.options && obj.options.clickable) this.camera_follow(obj)
 			}
 		})
 
