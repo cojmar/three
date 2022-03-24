@@ -359,7 +359,7 @@ new class {
 	}
 	init_helpers() {
 		this.helpers = [
-			new THREE.GridHelper(2000, 500),
+			new THREE.GridHelper(200, 500),
 			new THREE.AxesHelper(200, 50),
 			new THREE.FogExp2(0xdf0000, 0.0007)
 		]
