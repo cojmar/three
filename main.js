@@ -35,48 +35,66 @@ new class {
 	}
 	main() {
 		this.objects = {}
+
+		//sun
 		this.objects.sun = this.make_planet(this.scene, {
 			material: THREE.MeshBasicMaterial,
 			radius: 2.5,
 			texture: 'sun',
 			spin: 1.5,
-			fov: 13
+			fov: 10
 		})
 		this.objects.sun.add(new THREE.PointLight(0xffffff, 1, 200000))
 
+		//mercury
 		this.objects.mercury = this.make_planet(this.scene, {
 			radius: 0.5,
 			texture: 'mercury',
-			orbit: [57.910 / 6, 0.8],
+			orbit: [57.910 / 8, 0.8],
 			spin: 2,
+			fov: 2
+		})
+
+		//venus
+		this.objects.venus = this.make_planet(this.scene, {
+			texture: 'venus',
+			orbit: [108.200 / 8, 0.4],
+			spin: 1.3,
+			fov: 2.7
+		})
+
+		//earth
+		this.objects.earth = this.make_planet(this.scene, {
+			texture: 'earth',
+			orbit: [149.600 / 8, 0.2],
+			spin: 3,
 			fov: 2.6
 		})
 
-		this.objects.venus = this.make_planet(this.scene, {
-			texture: 'venus',
-			orbit: [108.200 / 6, 0.4],
-			spin: 1.3,
-			fov: 3
-		})
-
-		this.objects.earth = this.make_planet(this.scene, {
-			texture: 'earth',
-			orbit: [149.600 / 6, 0.2],
-			spin: 3,
-			fov: 2.5
-		})
-
+		//moon
 		this.objects.moon = this.make_planet(this.objects.earth, {
-			radius: 0.2,
+			radius: 0.16,
 			texture: 'moon',
 			orbit: [3.84 / 3, 2],
 			spin: 1,
-			fov: 0.7
+			fov: 0.6
 		})
 
+		//mars
+		this.objects.mars = this.make_planet(this.scene, {
+			radius: 0.4,
+			position: new THREE.Vector3(0, 0, -40),
+			texture: 'mars',
+			orbit: [227.940 / 8, 0.1],
+			spin: 2,
+			fov: 1.35
+		})
+
+		//stars
 		this.make_starts(this.objects.sun)
-		this.init_dom()
+
 		this.camera_follow(this.objects.earth)
+		this.init_dom()
 	}
 	camera_follow(obj) {
 		obj = (typeof obj !== 'object') ? this.objects[obj] || false : obj
