@@ -86,7 +86,7 @@ new class {
 			position: new THREE.Vector3(0, 0, -40),
 			texture: 'mars',
 			orbit: [227.940 / 8, 0.1],
-			spin: 2,
+			spin: 2.2,
 			fov: 1.35
 		})
 
