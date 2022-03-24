@@ -31,7 +31,7 @@ new class {
 	}
 	time(set_time = false) {
 		if (set_time) this.initial_time = set_time
-		return window.performance.now()
+		return window.performance.now() * this.time_speed
 	}
 	main() {
 		this.objects = {}
@@ -47,21 +47,21 @@ new class {
 		this.objects.mercury = this.make_planet(this.scene, {
 			radius: 0.5,
 			texture: 'mercury',
-			orbit: [57.910 / 4, 0.8],
+			orbit: [57.910 / 6, 0.8],
 			spin: 2,
 			fov: 2.6
 		})
 
 		this.objects.venus = this.make_planet(this.scene, {
 			texture: 'venus',
-			orbit: [108.200 / 4, 0.4],
+			orbit: [108.200 / 6, 0.4],
 			spin: 1.3,
 			fov: 3
 		})
 
 		this.objects.earth = this.make_planet(this.scene, {
 			texture: 'earth',
-			orbit: [149.600 / 4, 0.2],
+			orbit: [149.600 / 6, 0.2],
 			spin: 3,
 			fov: 2.5
 		})
@@ -70,7 +70,7 @@ new class {
 			radius: 0.2,
 			texture: 'moon',
 			orbit: [3.84 / 3, 2],
-			spin: 1.6,
+			spin: 1,
 			fov: 0.7
 		})
 
@@ -85,6 +85,7 @@ new class {
 			if (this.camera_obj.options && this.camera_obj.options.fov) {
 				this.camera.fov = this.camera_obj.options.fov
 				this.camera.updateProjectionMatrix()
+				if (this.controls) this.controls.update()
 			}
 
 		}
@@ -95,7 +96,7 @@ new class {
 	make_starts(scene) {
 		let addStar = () => {
 
-			const star = new THREE.Mesh(new THREE.SphereGeometry(0.02, 24, 24), new THREE.MeshBasicMaterial({ color: 0x747171 }))
+			const star = new THREE.Mesh(new THREE.SphereGeometry(0.05, 24, 24), new THREE.MeshBasicMaterial({ color: 0x747171 }))
 			const [x, y, z] = [
 				THREE.MathUtils.randFloatSpread(200),
 				THREE.MathUtils.randFloatSpread(200),
@@ -103,14 +104,14 @@ new class {
 			]
 			star.position.set(x, y, z)
 			let ok = true
-			let limit = 70
-			if (x > -1 * limit && x < limit) ok = false
+			let limit = 80
+			if ((x > -1 * limit && x < limit) && (y > -1 * limit && y < limit) && (z > -1 * limit && z < limit)) ok = false
 
 
 			if (ok) scene.add(star)
 		}
 
-		Array(15000).fill().map(addStar)
+		Array(1500).fill().map(addStar)
 	}
 
 	make_planet(scene, options) {
@@ -134,7 +135,7 @@ new class {
 		}
 
 		if (options.orbit) obj.update(() => {
-			let time = this.time() * this.time_speed
+			let time = this.time()
 			if (typeof options.orbit !== 'object') options.orbit = [options.orbit]
 			time /= (Math.pow(10, 6 - Math.abs(options.orbit[1] || 0)))
 			time *= -1
@@ -144,10 +145,10 @@ new class {
 		})
 
 		if (options.spin) obj.update(() => {
-			let time = this.time() * this.time_speed
+			let time = this.time()
 			time /= (Math.pow(10, 6 - Math.abs(options.spin)))
 			if (options.spin < 0) time *= -1
-			planet.rotation.y = time
+			planet.rotation.y += time / 1000
 		})
 
 		if (scene) scene.add(obj)
@@ -196,6 +197,22 @@ new class {
 					e.target.innerHTML = e.target.innerHTML.replace("(off)", "(on)")
 				}
 			}
+			this.mouseVector = new THREE.Vector3()
+			window.addEventListener('mousemove', (e) => {
+				this.mouseVector.x = 2 * (e.clientX / window.innerWidth) - 1
+				this.mouseVector.y = 1 - 2 * (e.clientY / window.innerHeight)
+				this.raycaster.setFromCamera(this.mouseVector, this.camera)
+				const intersects = this.raycaster.intersectObjects(this.scene.children, true)
+				this.renderer.domElement.style.cursor = intersects.length ? 'pointer' : 'default'
+			})
+
+			window.addEventListener('click', (e) => {
+				this.mouseVector.x = 2 * (e.clientX / window.innerWidth) - 1
+				this.mouseVector.y = 1 - 2 * (e.clientY / window.innerHeight)
+				this.raycaster.setFromCamera(this.mouseVector, this.camera)
+				const intersects = this.raycaster.intersectObjects(this.scene.children, true)
+				if (intersects.length) this.camera_follow(intersects[0].object.parent)
+			})
 
 			window.addEventListener("hashchange", () => {
 				this.camera_follow(location.hash.replace('#', ''))
@@ -207,14 +224,16 @@ new class {
 
 	init_three() {
 		this.camera = new THREE.PerspectiveCamera(2, window.innerWidth / window.innerHeight, 1, 3000)
-		this.camera.position.set(0, 20, -20)
+		this.camera.position.set(0, 20, -40)
 
 		this.scene = new THREE.Scene()
-		this.camera.lookAt(this.scene.position)
+		this.camera.lookAt(200, 0, 0)
 
 		this.scene.add(new THREE.AmbientLight(0xffffff, 0.03))
 
 		this.light = new THREE.AmbientLight(0xffffff, 1)
+
+		this.raycaster = new THREE.Raycaster();
 
 
 		this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
