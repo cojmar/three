@@ -67,7 +67,7 @@ new class {
 		this.objects.earth = this.make_planet(this.scene, {
 			texture: 'earth',
 			orbit: [149.600 / 8, 0.2],
-			spin: 2.8,
+			spin: 2.6,
 			fov: 2.6
 		})
 		this.camera_follow(this.objects.earth)
@@ -87,7 +87,7 @@ new class {
 			position: new THREE.Vector3(0, 0, -40),
 			texture: 'mars',
 			orbit: [227.940 / 8, 0.1],
-			spin: 2.6,
+			spin: 2.5,
 			fov: 1.35
 		})
 
