@@ -1,5 +1,5 @@
-import * as THREE from './assets/js/three.module.js'
-import { OrbitControls } from './assets/js/OrbitControls.js'
+import * as THREE from 'three'
+import { OrbitControls } from './jsm/controls/OrbitControls.js'
 
 new class {
 	constructor() {
@@ -190,7 +190,7 @@ new class {
 			let ok = (distance > (radius - width) && distance < radius)
 			if (ok) obj.add(asteroid)
 		}
-		Array(10000).fill().map(addAsteroid)
+		Array(6000).fill().map(addAsteroid)
 		return obj
 	}
 
