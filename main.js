@@ -104,6 +104,7 @@ new class {
 			let time = this.time()
 			time /= (Math.pow(10, 6))
 			this.objects.asteroids.rotation.y += time / 1000
+			this.objects.asteroids.children.map(asteroid => { if (asteroid.update) asteroid.update() })
 		})
 
 
@@ -175,6 +176,16 @@ new class {
 				THREE.MathUtils.randFloatSpread(2 * radius + width)
 			]
 			asteroid.position.set(x, y, z)
+			let options = { spin: 2 }
+			asteroid.update = () => {
+				let time = this.time()
+
+				time /= (Math.pow(10, 6 - Math.abs(options.spin)))
+				if (options.spin < 0) time *= -1
+				asteroid.rotation.z += time / 1000
+				asteroid.rotation.x += time / 1000
+			}
+
 			let distance = Math.sqrt(x * x + z * z)
 			let ok = (distance > (radius - width) && distance < radius)
 			if (ok) obj.add(asteroid)
